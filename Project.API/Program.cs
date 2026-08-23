@@ -3,18 +3,18 @@ using Project.DAL.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. تفعيل نظام الـ Controllers وتوثيق OpenAPI
+// تفعيل نظام الـ Controllers وتوثيق Swagger
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 2. تسجيل خدمات الطبقات (Dependency Injection)
+// تسجيل حقن التبعيات (Dependency Injection)
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ITaxCalculator, SaudiVatCalculator>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
-// 3. إعدادات بيئة التطوير
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -25,6 +25,3 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
-
-
-

@@ -5,29 +5,30 @@ namespace Project.BLL.Services;
 
 public interface IProductService
 {
-    List<ProductDto> GetProducts();
+    IReadOnlyList<ProductDto> GetProducts();
 }
 
 public class ProductService : IProductService
 {
-    private readonly IProductRepository _repo;
+    private readonly IProductRepository _repository;
+    private readonly ITaxCalculator _taxCalculator;
 
-    public ProductService(IProductRepository repo)
+    public ProductService(IProductRepository repository, ITaxCalculator taxCalculator)
     {
-        _repo = repo;
+        _repository = repository;
+        _taxCalculator = taxCalculator;
     }
 
-    public List<ProductDto> GetProducts()
+    public IReadOnlyList<ProductDto> GetProducts()
     {
-        // 1. جلب البيانات من طبقة البيانات (DAL)
-        var products = _repo.GetAll();
+        var products = _repository.GetAll();
 
         // 2. تطبيق منطق العمل (BLL): حساب ضريبة 15% وتحويلها لـ DTO
         return products.Select(p => new ProductDto
         {
             Id = p.Id,
             Name = p.Name,
-            PriceWithVat = p.Price * 1.15m
-        }).ToList();
+            PriceWithVat = _taxCalculator.CalculateTotalWithTax(p.Price)
+        }).ToList().AsReadOnly();
     }
 }

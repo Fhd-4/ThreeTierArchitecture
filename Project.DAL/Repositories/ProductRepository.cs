@@ -2,20 +2,25 @@
 
 namespace Project.DAL.Repositories;
 
-public interface IProductRepository
+public interface IReadOnlyRepository<T> where T : BaseEntity
 {
-    List<Product> GetAll();
+    IReadOnlyList<T> GetAll();
+    T? GetById(int id);
+}
+
+public interface IProductRepository : IReadOnlyRepository<Product>
+{
 }
 
 public class ProductRepository : IProductRepository
 {
-    // بيانات وهمية مؤقتة تحاكي الداتا بيس
-    public List<Product> GetAll()
+    private readonly List<Product> _products = new()
     {
-        return new List<Product>
-        {
-            new Product { Id = 1, Name = "Laptop", Price = 3500 },
-            new Product { Id = 2, Name = "Mouse", Price = 150 }
-        };
-    }
+        new Product(1, "Laptop", 3500),
+        new Product(2, "Mouse", 150)
+    };
+
+    public IReadOnlyList<Product> GetAll() => _products.AsReadOnly();
+
+    public Product? GetById(int id) => _products.FirstOrDefault(p => p.Id == id);
 }
