@@ -1,16 +1,43 @@
-﻿using Project.DAL.Entities;
+using Microsoft.EntityFrameworkCore;
+using Project.DAL.Data;
+using Project.DAL.Entities;
 
 namespace Project.DAL.Repositories;
 
 public class ProductRepository : IProductRepository
 {
-    private readonly List<Product> _products = new()
+    private readonly AppDbContext _context;
+
+    public ProductRepository(AppDbContext context)
     {
-        new Product(1, "Laptop", 3500),
-        new Product(2, "Mouse", 150)
-    };
+        _context = context;
+    }
 
-    public IReadOnlyList<Product> GetAll() => _products.AsReadOnly();
+    public async Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Products.ToListAsync(cancellationToken);
+    }
 
-    public Product? GetById(int id) => _products.FirstOrDefault(p => p.Id == id);
+    public async Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Products.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public async Task AddAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        await _context.Products.AddAsync(product, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        _context.Products.Update(product);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }
