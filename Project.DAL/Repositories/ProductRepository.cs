@@ -2,16 +2,6 @@
 
 namespace Project.DAL.Repositories;
 
-public interface IReadOnlyRepository<T> where T : BaseEntity
-{
-    IReadOnlyList<T> GetAll();
-    T? GetById(int id);
-}
-
-public interface IProductRepository : IReadOnlyRepository<Product>
-{
-}
-
 public class ProductRepository : IProductRepository
 {
     private readonly List<Product> _products = new()

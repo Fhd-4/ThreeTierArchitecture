@@ -3,11 +3,6 @@ using Project.DAL.Repositories;
 
 namespace Project.BLL.Services;
 
-public interface IProductService
-{
-    IReadOnlyList<ProductDto> GetProducts();
-}
-
 public class ProductService : IProductService
 {
     private readonly IProductRepository _repository;
@@ -23,7 +18,6 @@ public class ProductService : IProductService
     {
         var products = _repository.GetAll();
 
-        // 2. تطبيق منطق العمل (BLL): حساب ضريبة 15% وتحويلها لـ DTO
         return products.Select(p => new ProductDto
         {
             Id = p.Id,
