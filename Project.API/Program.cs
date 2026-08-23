@@ -20,6 +20,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
+// تسجيل معالج الأخطاء المركزي (Global Exception Handler) في بداية خط المعالجة
+app.UseMiddleware<Project.API.Middlewares.ExceptionHandlingMiddleware>();
+
 // تهيئة وتحديث قاعدة البيانات تلقائياً وتطبيق الهجرات (Migrations) عند تشغيل التطبيق
 using (var scope = app.Services.CreateScope())
 {
