@@ -20,11 +20,11 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
-// تهيئة قاعدة البيانات والتأكد من إدخال البيانات الأولية (EnsureCreated)
+// تهيئة وتحديث قاعدة البيانات تلقائياً وتطبيق الهجرات (Migrations) عند تشغيل التطبيق
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.EnsureCreated();
+    dbContext.Database.Migrate();
 }
 
 if (app.Environment.IsDevelopment())
