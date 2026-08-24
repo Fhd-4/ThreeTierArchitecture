@@ -23,8 +23,8 @@ public class ProductsController : ControllerBase
         return Ok(ApiResponse<IReadOnlyList<ProductDto>>.SuccessResponse(result, "تم جلب قائمة المنتجات بنجاح"));
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
     {
         var result = await _service.GetProductByIdAsync(id, cancellationToken);
         if (result == null)
@@ -44,15 +44,15 @@ public class ProductsController : ControllerBase
             ApiResponse<ProductDto>.SuccessResponse(result, "تم إنشاء المنتج بنجاح"));
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto dto, CancellationToken cancellationToken)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] UpdateProductDto dto, CancellationToken cancellationToken)
     {
         await _service.UpdateProductAsync(id, dto, cancellationToken);
         return Ok(ApiResponse<object>.SuccessResponse(null!, "تم تعديل بيانات المنتج بنجاح"));
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
         await _service.DeleteProductAsync(id, cancellationToken);
         return Ok(ApiResponse<object>.SuccessResponse(null!, "تم حذف المنتج بنجاح"));

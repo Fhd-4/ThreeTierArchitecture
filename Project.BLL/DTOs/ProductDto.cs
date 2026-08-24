@@ -1,8 +1,8 @@
-﻿namespace Project.BLL.DTOs;
+namespace Project.BLL.DTOs;
 
 public class ProductDto
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public decimal PriceWithVat { get; set; } // السعر مع الضريبة
 }

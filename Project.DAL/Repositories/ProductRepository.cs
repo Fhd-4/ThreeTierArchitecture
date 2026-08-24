@@ -18,7 +18,7 @@ public class ProductRepository : IProductRepository
         return await _context.Products.ToListAsync(cancellationToken);
     }
 
-    public async Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<Product?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         return await _context.Products.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }

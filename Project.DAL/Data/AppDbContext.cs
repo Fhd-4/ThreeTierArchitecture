@@ -24,8 +24,8 @@ public class AppDbContext : DbContext
         // تاريخ ثابت لمنع حدوث خطأ PendingModelChangesWarning بسبب التواريخ الديناميكية
         var seedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         modelBuilder.Entity<Product>().HasData(
-            new Product(1, "Laptop", 3500) { CreatedAt = seedDate },
-            new Product(2, "Mouse", 150) { CreatedAt = seedDate }
+            new Product("seed-laptop-id", "Laptop", 3500) { CreatedAt = seedDate },
+            new Product("seed-mouse-id", "Mouse", 150) { CreatedAt = seedDate }
         );
     }
 

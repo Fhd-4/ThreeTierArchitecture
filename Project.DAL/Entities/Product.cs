@@ -5,25 +5,31 @@ public class Product : BaseEntity
     public string Name { get; private set; }
     public decimal Price { get; private set; }
 
-    // مشيد خاص لـ Entity Framework لتمكينه من قراءة الكائن من قاعدة البيانات دون التحقق من صحة المدخلات مجدداً
+    // مشيد خاص لـ Entity Framework أو محركات البيانات التي تتطلب مشيداً افتراضياً
     protected Product()
     {
         Name = null!;
     }
 
+    // مشيد لإنشاء منتج جديد وتوليد معرف GUID فريد (مستقل عن قاعدة البيانات)
     public Product(string name, decimal price)
     {
         ValidateDetails(name, price);
+        Id = Guid.NewGuid().ToString(); // توليد المعرف الفريد هنا
         Name = name;
         Price = price;
     }
 
-    public Product(int id, string name, decimal price) : this(name, price)
+    // مشيد يُستخدم عند استرجاع البيانات أو إدخال بيانات أولية محددة المعرف
+    public Product(string id, string name, decimal price) : this(name, price)
     {
+        if (string.IsNullOrWhiteSpace(id))
+            throw new ArgumentException("معرف المنتج لا يمكن أن يكون فارغاً");
+
         Id = id;
     }
 
-    // طريقة لتحديث التفاصيل مع الحفاظ على مبادئ OOP (الكبسلة Encapsulation والتحقق من صحة البيانات)
+    // طريقة لتحديث التفاصيل مع الحفاظ على مبادئ OOP (الكبسلة والتحقق من صحة البيانات)
     public void UpdateDetails(string name, decimal price)
     {
         ValidateDetails(name, price);

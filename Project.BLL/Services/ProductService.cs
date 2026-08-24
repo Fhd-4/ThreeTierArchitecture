@@ -21,7 +21,7 @@ public class ProductService : IProductService
         return products.Select(MapToDto).ToList().AsReadOnly();
     }
 
-    public async Task<ProductDto?> GetProductByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<ProductDto?> GetProductByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         var product = await _repository.GetByIdAsync(id, cancellationToken);
         return product == null ? null : MapToDto(product);
@@ -32,7 +32,7 @@ public class ProductService : IProductService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto), "بيانات المنتج لا يمكن أن تكون فارغة");
 
-        // هنا يتم إنشاء كائن الكيان مع التحقق الداخلي من البيانات (OOP Encapsulation)
+        // إنشاء كيان المنتج وتوليد المعرف GUID تلقائياً داخله (OOP Encapsulation)
         var product = new Product(dto.Name, dto.Price);
 
         await _repository.AddAsync(product, cancellationToken);
@@ -40,7 +40,7 @@ public class ProductService : IProductService
         return MapToDto(product);
     }
 
-    public async Task UpdateProductAsync(int id, UpdateProductDto dto, CancellationToken cancellationToken = default)
+    public async Task UpdateProductAsync(string id, UpdateProductDto dto, CancellationToken cancellationToken = default)
     {
         if (dto == null)
             throw new ArgumentNullException(nameof(dto), "بيانات التعديل لا يمكن أن تكون فارغة");
@@ -55,7 +55,7 @@ public class ProductService : IProductService
         await _repository.UpdateAsync(product, cancellationToken);
     }
 
-    public async Task DeleteProductAsync(int id, CancellationToken cancellationToken = default)
+    public async Task DeleteProductAsync(string id, CancellationToken cancellationToken = default)
     {
         var product = await _repository.GetByIdAsync(id, cancellationToken);
         if (product == null)

@@ -2,6 +2,6 @@ namespace Project.DAL.Entities;
 
 public abstract class BaseEntity
 {
-    public int Id { get; protected set; }
+    public string Id { get; protected set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 }

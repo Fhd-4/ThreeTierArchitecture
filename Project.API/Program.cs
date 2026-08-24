@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using Project.API.Middlewares;
 using Project.BLL.Services;
-using Project.DAL.Data;
 using Project.DAL.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,26 +9,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 1. تسجيل قاعدة البيانات (SQL Server Database)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// 1. تسجيل عميل MongoDB (NoSQL Database)
+builder.Services.AddSingleton<IMongoClient>(sp => 
+    new MongoClient(builder.Configuration.GetConnectionString("MongoConnection")));
 
 // 2. تسجيل الـ Repositories والـ Services
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+// قمنا فقط بتغيير الفئة الملموسة لتكون MongoProductRepository بدلاً من ProductRepository
+builder.Services.AddScoped<IProductRepository, MongoProductRepository>();
 builder.Services.AddScoped<ITaxCalculator, SaudiVatCalculator>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
 // تسجيل معالج الأخطاء المركزي (Global Exception Handler) في بداية خط المعالجة
-app.UseMiddleware<Project.API.Middlewares.ExceptionHandlingMiddleware>();
-
-// تهيئة وتحديث قاعدة البيانات تلقائياً وتطبيق الهجرات (Migrations) عند تشغيل التطبيق
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
-}
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
