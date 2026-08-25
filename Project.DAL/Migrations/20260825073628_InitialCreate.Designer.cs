@@ -12,7 +12,7 @@ using Project.DAL.Data;
 namespace Project.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260823115747_InitialCreate")]
+    [Migration("20260825073628_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -27,11 +27,8 @@ namespace Project.DAL.Migrations
 
             modelBuilder.Entity("Project.DAL.Entities.Product", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -50,14 +47,14 @@ namespace Project.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = "seed-laptop-id",
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Laptop",
                             Price = 3500m
                         },
                         new
                         {
-                            Id = 2,
+                            Id = "seed-mouse-id",
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Mouse",
                             Price = 150m

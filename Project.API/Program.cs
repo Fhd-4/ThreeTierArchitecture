@@ -1,6 +1,7 @@
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using Project.API.Middlewares;
 using Project.BLL.Services;
+using Project.DAL.Data;
 using Project.DAL.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,13 +10,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 1. تسجيل عميل MongoDB (NoSQL Database)
-builder.Services.AddSingleton<IMongoClient>(sp => 
-    new MongoClient(builder.Configuration.GetConnectionString("MongoConnection")));
+// 1. تسجيل قاعدة البيانات (SQL Server Database)
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. تسجيل الـ Repositories والـ Services
-// قمنا فقط بتغيير الفئة الملموسة لتكون MongoProductRepository بدلاً من ProductRepository
-builder.Services.AddScoped<IProductRepository, MongoProductRepository>();
+// قمنا بإرجاع المستودع الخاص بـ SQL Server (بدون أي تعديل في الطبقات الأخرى)
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ITaxCalculator, SaudiVatCalculator>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
@@ -23,6 +24,13 @@ var app = builder.Build();
 
 // تسجيل معالج الأخطاء المركزي (Global Exception Handler) في بداية خط المعالجة
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// تهيئة وتحديث قاعدة البيانات تلقائياً وتطبيق الهجرات (Migrations) عند تشغيل التطبيق
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {

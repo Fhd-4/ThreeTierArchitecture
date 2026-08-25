@@ -17,8 +17,7 @@ namespace Project.DAL.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -33,8 +32,8 @@ namespace Project.DAL.Migrations
                 columns: new[] { "Id", "CreatedAt", "Name", "Price" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Laptop", 3500m },
-                    { 2, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Mouse", 150m }
+                    { "seed-laptop-id", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Laptop", 3500m },
+                    { "seed-mouse-id", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Mouse", 150m }
                 });
         }
 
