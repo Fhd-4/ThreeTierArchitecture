@@ -3,8 +3,16 @@ using Project.API.Middlewares;
 using Project.BLL.Services;
 using Project.DAL.Data;
 using Project.DAL.Repositories;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// تهيئة وإعداد Serilog لقراءة إعدادات السجلات من appsettings.json
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -15,15 +23,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. تسجيل الـ Repositories والـ Services
-// قمنا بإرجاع المستودع الخاص بـ SQL Server (بدون أي تعديل في الطبقات الأخرى)
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ITaxCalculator, SaudiVatCalculator>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
+// 3. إضافة وتكوين سياسة الـ CORS للسماح للأنجولر بالاتصال بالباك إند
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularAppPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // عنوان تطبيق الأنجولر
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
 // تسجيل معالج الأخطاء المركزي (Global Exception Handler) في بداية خط المعالجة
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// تفعيل سياسة الـ CORS التي تم تكوينها سابقاً
+app.UseCors("AngularAppPolicy");
 
 // تهيئة وتحديث قاعدة البيانات تلقائياً وتطبيق الهجرات (Migrations) عند تشغيل التطبيق
 using (var scope = app.Services.CreateScope())
@@ -41,4 +62,16 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 
-app.Run();
+try
+{
+    Log.Information("جاري بدء تشغيل الخادم والباك إند...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "فشل إقلاع الخادم بشكل غير متوقع!");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
