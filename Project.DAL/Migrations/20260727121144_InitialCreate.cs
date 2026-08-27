@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -41,10 +41,6 @@ namespace Project.DAL.Migrations
                     AboutAr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AboutEn = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsTwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TwoFactorCodeExpiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -63,41 +59,6 @@ namespace Project.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Categories",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AssignTo = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Plans",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProjectId = table.Column<int>(type: "int", nullable: false),
-                    ProjectName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Version = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Plans", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -207,48 +168,6 @@ namespace Project.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChatMessages",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ReceiverId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReplyToMessageId = table.Column<int>(type: "int", nullable: true),
-                    FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsEdited = table.Column<bool>(type: "bit", nullable: false),
-                    EditedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChatMessages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ChatMessages_AspNetUsers_ReceiverId",
-                        column: x => x.ReceiverId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ChatMessages_AspNetUsers_SenderId",
-                        column: x => x.SenderId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ChatMessages_ChatMessages_ReplyToMessageId",
-                        column: x => x.ReplyToMessageId,
-                        principalTable: "ChatMessages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Portfolios",
                 columns: table => new
                 {
@@ -257,13 +176,10 @@ namespace Project.DAL.Migrations
                     Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Budget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     SponsorName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     ManagerName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    OwnerName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    AttachedFiles = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -278,103 +194,6 @@ namespace Project.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlanDeliverables",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PlanId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ExpectedCompletionDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlanDeliverables", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PlanDeliverables_Plans_PlanId",
-                        column: x => x.PlanId,
-                        principalTable: "Plans",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PlanMilestones",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PlanId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TargetDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlanMilestones", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PlanMilestones_Plans_PlanId",
-                        column: x => x.PlanId,
-                        principalTable: "Plans",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MessageReactions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MessageId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Emoji = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MessageReactions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MessageReactions_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MessageReactions_ChatMessages_MessageId",
-                        column: x => x.MessageId,
-                        principalTable: "ChatMessages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MessageReadStates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MessageId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ReadAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MessageReadStates", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MessageReadStates_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MessageReadStates_ChatMessages_MessageId",
-                        column: x => x.MessageId,
-                        principalTable: "ChatMessages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Programs",
                 columns: table => new
                 {
@@ -384,12 +203,9 @@ namespace Project.DAL.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Budget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    ProgressPercentage = table.Column<int>(type: "int", nullable: false),
-                    SponsorName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    ManagerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PortfolioId = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AttachedDocumentUrls = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ManagerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -421,9 +237,7 @@ namespace Project.DAL.Migrations
                     Priority = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ManagerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ManagerName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    AttachedFiles = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ManagerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PortfolioId = table.Column<int>(type: "int", nullable: false),
                     ProgramId = table.Column<int>(type: "int", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -467,8 +281,7 @@ namespace Project.DAL.Migrations
                     RequestedById = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ApprovedById = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     RequestDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ActionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AttachedFiles = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ActionDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -487,34 +300,6 @@ namespace Project.DAL.Migrations
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ChangeRequests_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Meetings",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Time = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    MeetingLink = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    InvitedMembers = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AttachedFiles = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProjectId = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Meetings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Meetings_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -583,9 +368,7 @@ namespace Project.DAL.Migrations
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ProjectId = table.Column<int>(type: "int", nullable: false),
-                    AssigneeId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    AssigneeName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
-                    AttachedFiles = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    AssigneeId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -600,35 +383,6 @@ namespace Project.DAL.Migrations
                         name: "FK_Tasks_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ChangeRequestComments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ChangeRequestId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChangeRequestComments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ChangeRequestComments_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ChangeRequestComments_ChangeRequests_ChangeRequestId",
-                        column: x => x.ChangeRequestId,
-                        principalTable: "ChangeRequests",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -673,16 +427,6 @@ namespace Project.DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChangeRequestComments_ChangeRequestId",
-                table: "ChangeRequestComments",
-                column: "ChangeRequestId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChangeRequestComments_UserId",
-                table: "ChangeRequestComments",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ChangeRequests_ApprovedById",
                 table: "ChangeRequests",
                 column: "ApprovedById");
@@ -698,59 +442,9 @@ namespace Project.DAL.Migrations
                 column: "RequestedById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatMessages_ReceiverId",
-                table: "ChatMessages",
-                column: "ReceiverId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatMessages_ReplyToMessageId",
-                table: "ChatMessages",
-                column: "ReplyToMessageId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatMessages_SenderId",
-                table: "ChatMessages",
-                column: "SenderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Meetings_ProjectId",
-                table: "Meetings",
-                column: "ProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MessageReactions_MessageId",
-                table: "MessageReactions",
-                column: "MessageId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MessageReactions_UserId",
-                table: "MessageReactions",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MessageReadStates_MessageId",
-                table: "MessageReadStates",
-                column: "MessageId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MessageReadStates_UserId",
-                table: "MessageReadStates",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Milestones_ProjectId",
                 table: "Milestones",
                 column: "ProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlanDeliverables_PlanId",
-                table: "PlanDeliverables",
-                column: "PlanId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlanMilestones_PlanId",
-                table: "PlanMilestones",
-                column: "PlanId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Portfolios_OwnerId",
@@ -817,28 +511,10 @@ namespace Project.DAL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
-                name: "ChangeRequestComments");
-
-            migrationBuilder.DropTable(
-                name: "Meetings");
-
-            migrationBuilder.DropTable(
-                name: "MessageReactions");
-
-            migrationBuilder.DropTable(
-                name: "MessageReadStates");
+                name: "ChangeRequests");
 
             migrationBuilder.DropTable(
                 name: "Milestones");
-
-            migrationBuilder.DropTable(
-                name: "PlanDeliverables");
-
-            migrationBuilder.DropTable(
-                name: "PlanMilestones");
 
             migrationBuilder.DropTable(
                 name: "ProjectMembers");
@@ -848,15 +524,6 @@ namespace Project.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "ChangeRequests");
-
-            migrationBuilder.DropTable(
-                name: "ChatMessages");
-
-            migrationBuilder.DropTable(
-                name: "Plans");
 
             migrationBuilder.DropTable(
                 name: "Projects");
@@ -872,3 +539,4 @@ namespace Project.DAL.Migrations
         }
     }
 }
+

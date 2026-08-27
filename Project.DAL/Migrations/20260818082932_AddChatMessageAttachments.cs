@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ProjectManagement.API.Migrations
+namespace Project.DAL.Migrations
 {
     /// <inheritdoc />
     public partial class AddChatMessageAttachments : Migration
@@ -46,3 +46,4 @@ namespace ProjectManagement.API.Migrations
         }
     }
 }
+

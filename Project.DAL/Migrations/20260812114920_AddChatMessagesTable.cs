@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ProjectManagement.API.Migrations
+namespace Project.DAL.Migrations
 {
     /// <inheritdoc />
     public partial class AddChatMessagesTable : Migration
@@ -58,3 +58,4 @@ namespace ProjectManagement.API.Migrations
         }
     }
 }
+
