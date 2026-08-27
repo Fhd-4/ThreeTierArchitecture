@@ -6,3 +6,4 @@ public class UserActivityDto
     public string Action { get; set; } = string.Empty; // Login or Logout
     public string Timestamp { get; set; } = string.Empty;
 }
+

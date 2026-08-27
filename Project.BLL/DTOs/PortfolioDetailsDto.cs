@@ -1,0 +1,38 @@
+using System;
+
+namespace Project.BLL.DTOs
+{
+    public class PortfolioDetailsDto
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public string? Description { get; set; }
+
+        public decimal Budget { get; set; }
+        public string Category { get; set; } = string.Empty;
+
+        public string Status { get; set; } = "Active";
+
+        public string SponsorName { get; set; } = string.Empty;
+
+        public string ManagerName { get; set; } = string.Empty;
+
+        public DateTime CreatedDate { get; set; }
+
+        public string? OwnerName { get; set; }
+        public string? OwnerId { get; set; }
+        public string? AttachedFiles { get; set; }
+
+        public int ProjectsCount { get; set; }
+
+        public int ProgramsCount { get; set; }
+
+        // Frontend compatibility mappings
+        public string nameAr => Name;
+        public string nameEn => Name;
+        public string? descriptionAr => Description;
+        public string? descriptionEn => Description;
+    }
+}
