@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Project.API.Common;
-using Project.API.Models;
+using Project.BLL.DTOs;
 using Serilog;
 
 namespace Project.API.Controllers;

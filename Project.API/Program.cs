@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Project.API.Middlewares;
-using Project.BLL.Services;
 using Project.DAL.Data;
-using Project.DAL.Repositories;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,12 +20,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. تسجيل الـ Repositories والـ Services
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ITaxCalculator, SaudiVatCalculator>();
-builder.Services.AddScoped<IProductService, ProductService>();
-
-// 3. إضافة وتكوين سياسة الـ CORS للسماح للأنجولر بالاتصال بالباك إند
+// 2. إضافة وتكوين سياسة الـ CORS للسماح للأنجولر بالاتصال بالباك إند
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularAppPolicy", policy =>

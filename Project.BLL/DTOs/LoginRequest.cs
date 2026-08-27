@@ -1,4 +1,4 @@
-namespace Project.API.Models;
+namespace Project.BLL.DTOs;
 
 public class LoginRequest
 {

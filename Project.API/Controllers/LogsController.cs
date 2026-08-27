@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Project.API.Common;
-using Project.API.Models;
+using Project.BLL.DTOs;
 using System.IO;
 using System.Text.RegularExpressions;
 
