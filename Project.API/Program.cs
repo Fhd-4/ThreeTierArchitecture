@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Project.API.Middlewares;
 using Project.DAL.Data;
+using Project.DAL.Interfaces;
+using Project.DAL.Repositories;
+using Project.BLL.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,11 @@ builder.Services.AddSwaggerGen();
 // 1. تسجيل قاعدة البيانات (SQL Server Database)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// تسجيل خدمات المستودعات والمنطق (Repositories & Services)
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+builder.Services.AddScoped<IPortfolioService, PortfolioService>();
 
 // 2. إضافة وتكوين سياسة الـ CORS للسماح للأنجولر بالاتصال بالباك إند
 builder.Services.AddCors(options =>
