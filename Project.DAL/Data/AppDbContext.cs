@@ -1,60 +1,178 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Project.DAL.Entities;
+using Project.DAL.Models;
 
-namespace Project.DAL.Data;
-
-public class AppDbContext : DbContext
+namespace Project.DAL.Data
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-    }
-
-    public DbSet<Product> Products => Set<Product>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-
-        // تحديد دقة وحجم حقل السعر في قاعدة البيانات لمنع فقدان البيانات بعد الفاصلة
-        modelBuilder.Entity<Product>()
-            .Property(p => p.Price)
-            .HasColumnType("decimal(18, 2)");
-
-        // وضع بيانات أولية داخل قاعدة البيانات (Data Seeding)
-        // تاريخ ثابت لمنع حدوث خطأ PendingModelChangesWarning بسبب التواريخ الديناميكية
-        var seedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        modelBuilder.Entity<Product>().HasData(
-            new Product("seed-laptop-id", "Laptop", 3500) { CreatedAt = seedDate },
-            new Product("seed-mouse-id", "Mouse", 150) { CreatedAt = seedDate }
-        );
-    }
-
-    // تعبئة تاريخ الإنشاء تلقائياً عند إضافة سجل جديد (Audit Trail Pattern)
-    public override int SaveChanges()
-    {
-        UpdateAuditFields();
-        return base.SaveChanges();
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        UpdateAuditFields();
-        return base.SaveChangesAsync(cancellationToken);
-    }
-
-    private void UpdateAuditFields()
-    {
-        var entries = ChangeTracker
-            .Entries()
-            .Where(e => e.Entity is BaseEntity && e.State == EntityState.Added);
-
-        foreach (var entry in entries)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-            var entity = (BaseEntity)entry.Entity;
-            if (entity.CreatedAt == default)
-            {
-                entity.CreatedAt = DateTime.UtcNow;
-            }
+        }
+
+        public DbSet<Portfolio> Portfolios { get; set; }
+        public DbSet<ProjectProgram> Programs { get; set; }
+        public DbSet<Project.DAL.Models.Project> Projects { get; set; }
+        public DbSet<ProjectMember> ProjectMembers { get; set; }
+        public DbSet<ProjectTask> Tasks { get; set; }
+        public DbSet<Milestone> Milestones { get; set; }
+        public DbSet<ChangeRequest> ChangeRequests { get; set; }
+        public DbSet<ProjectMeeting> Meetings { get; set; }
+        public DbSet<ChangeRequestComment> ChangeRequestComments { get; set; }
+
+        public DbSet<Plan> Plans { get; set; }
+        public DbSet<PlanMilestone> PlanMilestones { get; set; }
+        public DbSet<PlanDeliverable> PlanDeliverables { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<MessageReaction> MessageReactions { get; set; }
+        public DbSet<MessageReadState> MessageReadStates { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure ProjectMember Composite Key
+            modelBuilder.Entity<ProjectMember>()
+                .HasKey(pm => new { pm.ProjectId, pm.UserId });
+
+            modelBuilder.Entity<ProjectMember>()
+                .HasOne(pm => pm.Project)
+                .WithMany(p => p.ProjectMembers)
+                .HasForeignKey(pm => pm.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProjectMember>()
+                .HasOne(pm => pm.User)
+                .WithMany(u => u.ProjectMemberships)
+                .HasForeignKey(pm => pm.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Portfolio Owner relationship
+            modelBuilder.Entity<Portfolio>()
+                .HasOne(p => p.Owner)
+                .WithMany(u => u.Portfolios)
+                .HasForeignKey(p => p.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Program Manager relationship
+            modelBuilder.Entity<ProjectProgram>()
+                .HasOne(p => p.Manager)
+                .WithMany()
+                .HasForeignKey(p => p.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Project Relationships
+            modelBuilder.Entity<Project.DAL.Models.Project>()
+                .HasOne(p => p.Manager)
+                .WithMany()
+                .HasForeignKey(p => p.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Project.DAL.Models.Project>()
+                .HasOne(p => p.Portfolio)
+                .WithMany(pt => pt.Projects)
+                .HasForeignKey(p => p.PortfolioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Project.DAL.Models.Project>()
+                .HasOne(p => p.Program)
+                .WithMany(pr => pr.Projects)
+                .HasForeignKey(p => p.ProgramId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Configure Task Assignee relationship
+            modelBuilder.Entity<ProjectTask>()
+                .HasOne(t => t.Assignee)
+                .WithMany(u => u.Tasks)
+                .HasForeignKey(t => t.AssigneeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure ChangeRequest relationships
+            modelBuilder.Entity<ChangeRequest>()
+                .HasOne(cr => cr.RequestedBy)
+                .WithMany(u => u.RequestedChangeRequests)
+                .HasForeignKey(cr => cr.RequestedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure ChangeRequest relationships
+            modelBuilder.Entity<ChangeRequest>()
+                .HasOne(cr => cr.ApprovedBy)
+                .WithMany(u => u.ApprovedChangeRequests)
+                .HasForeignKey(cr => cr.ApprovedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChangeRequest>()
+                .HasOne(cr => cr.Project)
+                .WithMany(p => p.ChangeRequests)
+                .HasForeignKey(cr => cr.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProjectMeeting>()
+                .HasOne(m => m.Project)
+                .WithMany(p => p.Meetings)
+                .HasForeignKey(m => m.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Plan>()
+                .HasMany(p => p.Milestones)
+                .WithOne()
+                .HasForeignKey(m => m.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Plan>()
+                .HasMany(p => p.Deliverables)
+                .WithOne()
+                .HasForeignKey(d => d.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChangeRequestComment>()
+                .HasOne(c => c.ChangeRequest)
+                .WithMany()
+                .HasForeignKey(c => c.ChangeRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MessageReaction>()
+                .HasOne(r => r.Message)
+                .WithMany(m => m.Reactions)
+                .HasForeignKey(r => r.MessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MessageReaction>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(m => m.ReplyToMessage)
+                .WithMany()
+                .HasForeignKey(m => m.ReplyToMessageId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MessageReadState>()
+                .HasOne(r => r.Message)
+                .WithMany()
+                .HasForeignKey(r => r.MessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MessageReadState>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
