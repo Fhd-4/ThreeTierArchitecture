@@ -5,6 +5,8 @@ using Project.DAL.Interfaces;
 using Project.DAL.Repositories;
 using Project.BLL.Services;
 using Serilog;
+using Microsoft.AspNetCore.Identity;
+using Project.DAL.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,9 @@ builder.Services.AddSwaggerGen();
 // 1. تسجيل قاعدة البيانات (SQL Server Database)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 // تسجيل خدمات المستودعات والمنطق (Repositories & Services)
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
@@ -61,6 +65,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 try
