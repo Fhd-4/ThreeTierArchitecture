@@ -1,0 +1,55 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Project.DAL.Entities;
+
+public class Project
+{
+    public int Id { get; set; }
+
+    [Required]
+    [MaxLength(150)]
+    public string Name { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal Budget { get; set; }
+
+    public int Status { get; set; }
+
+    public int Priority { get; set; }
+
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+
+    public string? ManagerId { get; set; }
+
+    [ForeignKey("ManagerId")]
+    public ApplicationUser? Manager { get; set; }
+
+    [MaxLength(150)]
+    public string ManagerName { get; set; } = string.Empty;
+
+    public string? AttachedFiles { get; set; }
+
+    public int PortfolioId { get; set; }
+
+    [ForeignKey("PortfolioId")]
+    public Portfolio? Portfolio { get; set; }
+
+    public int? ProgramId { get; set; }
+
+    [ForeignKey("ProgramId")]
+    public ProjectProgram? Program { get; set; }
+
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    public ICollection<ProjectMember> ProjectMembers { get; set; } = new List<ProjectMember>();
+    public ICollection<ProjectTask> Tasks { get; set; } = new List<ProjectTask>();
+    public ICollection<Milestone> Milestones { get; set; } = new List<Milestone>();
+    public ICollection<ChangeRequest> ChangeRequests { get; set; } = new List<ChangeRequest>();
+    public ICollection<ProjectMeeting> Meetings { get; set; } = new List<ProjectMeeting>();
+}
