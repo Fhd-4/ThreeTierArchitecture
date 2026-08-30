@@ -1,9 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Project.API.Common;
 using Project.BLL.DTOs;
 using Project.BLL.Services;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -25,7 +27,7 @@ public class PortfoliosController : ControllerBase
     public async Task<IActionResult> GetPortfolios()
     {
         var portfolios = await _portfolioService.GetPortfoliosAsync();
-        return Ok(ApiResponse<IEnumerable<PortfolioDetailsDto>>.SuccessResponse(portfolios, "تم جلب المحافظ بنجاح."));
+        return Ok(portfolios); // Return raw list for Angular frontend compatibility
     }
 
     // 2. Get single portfolio by ID
@@ -35,9 +37,9 @@ public class PortfoliosController : ControllerBase
         var portfolio = await _portfolioService.GetPortfolioByIdAsync(id);
         if (portfolio == null)
         {
-            return NotFound(ApiResponse<object>.FailureResponse("المحفظة غير موجودة", "خطأ 404"));
+            return NotFound();
         }
-        return Ok(ApiResponse<PortfolioDetailsDto>.SuccessResponse(portfolio, "تم جلب تفاصيل المحفظة بنجاح."));
+        return Ok(portfolio);
     }
 
     // 3. Create a portfolio
@@ -46,13 +48,13 @@ public class PortfoliosController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<object>.FailureResponse("بيانات غير صالحة", "خطأ في التحقق"));
+            return BadRequest(ModelState);
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "default-user-id";
         var createdPortfolio = await _portfolioService.CreatePortfolioAsync(dto, userId);
 
-        return StatusCode(201, ApiResponse<PortfolioDetailsDto>.SuccessResponse(createdPortfolio, "تم إنشاء المحفظة بنجاح."));
+        return StatusCode(201, createdPortfolio);
     }
 
     // 4. Update a portfolio
@@ -61,16 +63,16 @@ public class PortfoliosController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<object>.FailureResponse("بيانات غير صالحة", "خطأ في التحقق"));
+            return BadRequest(ModelState);
         }
 
         var success = await _portfolioService.UpdatePortfolioAsync(id, dto);
         if (!success)
         {
-            return NotFound(ApiResponse<object>.FailureResponse("المحفظة غير موجودة أو فشل التعديل", "خطأ"));
+            return NotFound();
         }
 
-        return Ok(ApiResponse<object>.SuccessResponse(null!, "تم تحديث بيانات المحفظة بنجاح."));
+        return NoContent();
     }
 
     // 5. Delete a portfolio
@@ -80,9 +82,71 @@ public class PortfoliosController : ControllerBase
         var success = await _portfolioService.DeletePortfolioAsync(id);
         if (!success)
         {
-            return NotFound(ApiResponse<object>.FailureResponse("المحفظة غير موجودة", "خطأ 404"));
+            return NotFound();
         }
 
-        return Ok(ApiResponse<object>.SuccessResponse(null!, "تم حذف المحفظة بنجاح."));
+        return NoContent();
+    }
+
+    // 6. Test Users DB endpoint
+    [HttpGet("test-users-db")]
+    public async Task<IActionResult> TestUsersDb()
+    {
+        var users = await _portfolioService.GetUsersForTestAsync();
+        return Ok(users);
+    }
+
+    // 7. Get Portfolio stats
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetPortfolioStats()
+    {
+        var stats = await _portfolioService.GetStatsAsync();
+        return Ok(stats);
+    }
+
+    // 8. Upload files for portfolios
+    [HttpPost("upload")]
+    public async Task<IActionResult> UploadFiles(List<IFormFile> files)
+    {
+        if (files == null || files.Count == 0)
+        {
+            return BadRequest("No files uploaded.");
+        }
+
+        var uploadedFilesList = new List<object>();
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        foreach (var file in files)
+        {
+            if (file.Length > 0)
+            {
+                var originalName = file.FileName;
+                var uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(originalName);
+                var filePath = Path.Combine(uploadsFolder, uniqueName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var sizeInMb = (file.Length / (1024.0 * 1024.0)).ToString("F1") + " MB";
+                var ext = Path.GetExtension(originalName).TrimStart('.').ToLower();
+
+                uploadedFilesList.Add(new
+                {
+                    name = originalName,
+                    path = "/uploads/" + uniqueName,
+                    size = sizeInMb,
+                    type = ext
+                });
+            }
+        }
+
+        return Ok(uploadedFilesList);
     }
 }

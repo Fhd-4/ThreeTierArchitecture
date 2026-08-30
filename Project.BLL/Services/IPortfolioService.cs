@@ -11,4 +11,6 @@ public interface IPortfolioService
     Task<PortfolioDetailsDto> CreatePortfolioAsync(CreatePortfolioDto dto, string? userId);
     Task<bool> UpdatePortfolioAsync(int id, UpdatePortfolioDto dto);
     Task<bool> DeletePortfolioAsync(int id);
+    Task<IEnumerable<object>> GetUsersForTestAsync();
+    Task<object> GetStatsAsync();
 }

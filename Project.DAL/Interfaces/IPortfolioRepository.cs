@@ -12,4 +12,6 @@ public interface IPortfolioRepository
     void Update(Portfolio portfolio);
     void Delete(Portfolio portfolio);
     Task<bool> SaveChangesAsync();
+    Task<IEnumerable<ApplicationUser>> GetUsersForTestAsync();
+    Task<object> GetStatsAsync();
 }
