@@ -20,16 +20,17 @@ public class ProgramService : IProgramService
     public async Task<IEnumerable<ProgramDetailsDto>> GetProgramsAsync(int? portfolioId, string? keyword, int? status)
     {
         var programs = await _repo.GetAllAsync(portfolioId, keyword, status);
-        return programs.Select(MapToDetailsDto);
+        return programs.Select(MapToDetailsDto).ToList();
     }
 
     public async Task<ProgramDetailsDto?> GetProgramByIdAsync(int id)
     {
         var program = await _repo.GetByIdAsync(id);
-        return program != null ? MapToDetailsDto(program) : null;
+        if (program == null) return null;
+        return MapToDetailsDto(program);
     }
 
-    public async Task<ProgramDetailsDto> CreateProgramAsync(CreateProgramDto dto)
+    public async Task<ProjectProgram> CreateProgramAsync(CreateProgramDto dto)
     {
         var program = new ProjectProgram
         {
@@ -38,7 +39,7 @@ public class ProgramService : IProgramService
             Budget = dto.Budget,
             Status = dto.Status,
             PortfolioId = dto.PortfolioId,
-            SponsorName = dto.SponsorName ?? string.Empty,
+            SponsorName = dto.SponsorName,
             ManagerId = dto.ManagerId,
             CreatedDate = DateTime.UtcNow,
             ProgressPercentage = 0,
@@ -47,14 +48,12 @@ public class ProgramService : IProgramService
 
         await _repo.AddAsync(program);
         await _repo.SaveChangesAsync();
-
-        var created = await _repo.GetByIdAsync(program.Id);
-        return MapToDetailsDto(created ?? program);
+        return program;
     }
 
-    public async Task<ProgramDetailsDto?> UpdateProgramAsync(int id, UpdateProgramDto dto)
+    public async Task<ProjectProgram?> UpdateProgramAsync(int id, UpdateProgramDto dto)
     {
-        var program = await _repo.GetByIdAsync(id);
+        var program = await _repo.FindAsync(id);
         if (program == null) return null;
 
         program.Name = dto.Name;
@@ -62,28 +61,26 @@ public class ProgramService : IProgramService
         program.Budget = dto.Budget;
         program.Status = dto.Status;
         program.ProgressPercentage = dto.ProgressPercentage;
-        program.SponsorName = dto.SponsorName ?? string.Empty;
+        program.SponsorName = dto.SponsorName;
         program.ManagerId = dto.ManagerId;
         program.AttachedDocumentUrls = dto.AttachedUrls != null ? string.Join(",", dto.AttachedUrls) : null;
 
-        _repo.Update(program);
         await _repo.SaveChangesAsync();
-
-        return MapToDetailsDto(program);
+        return program;
     }
 
     public async Task<(bool Success, string? ErrorMessage)> DeleteProgramAsync(int id)
     {
         var program = await _repo.GetByIdAsync(id);
         if (program == null)
-            return (false, "Program not found.");
+            return (false, "Not Found");
 
         if (program.Projects != null && program.Projects.Any())
             return (false, "Cannot delete a program that currently contains active projects.");
 
         _repo.Delete(program);
-        var result = await _repo.SaveChangesAsync();
-        return (result, null);
+        await _repo.SaveChangesAsync();
+        return (true, null);
     }
 
     private ProgramDetailsDto MapToDetailsDto(ProjectProgram p)

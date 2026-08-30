@@ -2,7 +2,6 @@
 using Project.DAL.Data;
 using Project.DAL.Entities;
 using Project.DAL.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -49,14 +48,14 @@ public class ProgramRepository : IProgramRepository
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
+    public async Task<ProjectProgram?> FindAsync(int id)
+    {
+        return await _context.Programs.FindAsync(id);
+    }
+
     public async Task AddAsync(ProjectProgram program)
     {
         await _context.Programs.AddAsync(program);
-    }
-
-    public void Update(ProjectProgram program)
-    {
-        _context.Programs.Update(program);
     }
 
     public void Delete(ProjectProgram program)

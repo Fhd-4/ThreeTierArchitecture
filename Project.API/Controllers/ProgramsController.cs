@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Project.BLL.DTOs;
 using Project.BLL.Services;
+using Project.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ public class ProgramsController : ControllerBase
         _programService = programService;
     }
 
+    // 1. جلب كل البرامج مع ميزة الفلترة
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProgramDetailsDto>>> GetPrograms(
         [FromQuery] int? portfolioId,
@@ -32,6 +34,7 @@ public class ProgramsController : ControllerBase
         return Ok(programs);
     }
 
+    // 2. جلب تفاصيل برنامج معين لمعاينته
     [HttpGet("{id}")]
     public async Task<ActionResult<ProgramDetailsDto>> GetProgram(int id)
     {
@@ -42,36 +45,34 @@ public class ProgramsController : ControllerBase
         return Ok(program);
     }
 
+    // 3. إنشاء برنامج جديد وربطه بالمحفظة الأب
     [HttpPost]
-    public async Task<ActionResult<ProgramDetailsDto>> CreateProgram([FromBody] CreateProgramDto dto)
+    public async Task<ActionResult<ProjectProgram>> CreateProgram([FromBody] CreateProgramDto dto)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var created = await _programService.CreateProgramAsync(dto);
-        return CreatedAtAction(nameof(GetProgram), new { id = created.Id }, created);
+        var program = await _programService.CreateProgramAsync(dto);
+        return CreatedAtAction(nameof(GetProgram), new { id = program.Id }, program);
     }
 
+    // 4. تعديل بيانات البرنامج
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProgram(int id, [FromBody] UpdateProgramDto dto)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var updated = await _programService.UpdateProgramAsync(id, dto);
-        if (updated == null)
+        var program = await _programService.UpdateProgramAsync(id, dto);
+        if (program == null)
             return NotFound();
 
-        return Ok(updated);
+        return Ok(program);
     }
 
+    // 5. حذف البرنامج مع التحقق الأمني لحماية البيانات التابعة له
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProgram(int id)
     {
         var (success, errorMessage) = await _programService.DeleteProgramAsync(id);
+
         if (!success)
         {
-            if (errorMessage == "Program not found.")
+            if (errorMessage == "Not Found")
                 return NotFound();
 
             return BadRequest(errorMessage);
@@ -80,6 +81,7 @@ public class ProgramsController : ControllerBase
         return Ok(new { Message = "Program deleted successfully." });
     }
 
+    // 6. رفع الملفات للبرنامج
     [HttpPost("upload")]
     public async Task<IActionResult> UploadFiles(List<IFormFile> files)
     {

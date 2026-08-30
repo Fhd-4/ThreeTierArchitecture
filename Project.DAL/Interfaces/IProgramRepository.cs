@@ -8,8 +8,8 @@ public interface IProgramRepository
 {
     Task<IEnumerable<ProjectProgram>> GetAllAsync(int? portfolioId, string? keyword, int? status);
     Task<ProjectProgram?> GetByIdAsync(int id);
+    Task<ProjectProgram?> FindAsync(int id);
     Task AddAsync(ProjectProgram program);
-    void Update(ProjectProgram program);
     void Delete(ProjectProgram program);
     Task<bool> SaveChangesAsync();
 }
