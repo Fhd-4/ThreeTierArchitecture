@@ -35,6 +35,8 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IMeetingRepository, MeetingRepository>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
+builder.Services.AddScoped<IChangeRequestRepository, ChangeRequestRepository>();
+builder.Services.AddScoped<IChangeRequestService, ChangeRequestService>();
 
 // 2. إضافة وتكوين سياسة الـ CORS للسماح للأنجولر بالاتصال بالباك إند
 builder.Services.AddCors(options =>
