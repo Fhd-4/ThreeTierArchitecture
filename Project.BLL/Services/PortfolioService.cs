@@ -82,6 +82,24 @@ public class PortfolioService : IPortfolioService
         return await _repo.SaveChangesAsync();
     }
 
+    public async Task<IEnumerable<object>> GetUsersForTestAsync()
+    {
+        var users = await _repo.GetUsersForTestAsync();
+        return users.Select(u => new
+        {
+            u.Id,
+            u.UserName,
+            u.Email,
+            u.NameAr,
+            u.NameEn
+        });
+    }
+
+    public async Task<object> GetStatsAsync()
+    {
+        return await _repo.GetStatsAsync();
+    }
+
     // Helper Status Mapper
     private int MapStatusStringToInt(string? statusStr)
     {

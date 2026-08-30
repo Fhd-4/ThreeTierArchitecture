@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Project.API.Common;
 using Project.BLL.DTOs;
 using Project.BLL.Services;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Project.API.Controllers;
@@ -25,7 +28,7 @@ public class ProjectMeetingsController : ControllerBase
         [FromQuery] string? keyword)
     {
         var meetings = await _meetingService.GetMeetingsAsync(projectId, keyword);
-        return Ok(ApiResponse<IEnumerable<MeetingDetailsDto>>.SuccessResponse(meetings, "تم جلب الاجتماعات بنجاح."));
+        return Ok(meetings); // Raw list for Angular frontend compatibility
     }
 
     // 2. Get single meeting details
@@ -35,9 +38,9 @@ public class ProjectMeetingsController : ControllerBase
         var meeting = await _meetingService.GetMeetingByIdAsync(id);
         if (meeting == null)
         {
-            return NotFound(ApiResponse<object>.FailureResponse("الاجتماع غير موجود", "خطأ 404"));
+            return NotFound();
         }
-        return Ok(ApiResponse<MeetingDetailsDto>.SuccessResponse(meeting, "تم جلب تفاصيل الاجتماع بنجاح."));
+        return Ok(meeting);
     }
 
     // 3. Create meeting
@@ -46,16 +49,16 @@ public class ProjectMeetingsController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<object>.FailureResponse("بيانات غير صالحة", "خطأ في التحقق"));
+            return BadRequest(ModelState);
         }
 
         var createdMeeting = await _meetingService.CreateMeetingAsync(dto);
         if (createdMeeting == null)
         {
-            return BadRequest(ApiResponse<object>.FailureResponse("المشروع المرتبط غير موجود", "خطأ"));
+            return BadRequest(new { message = "Project not found" });
         }
 
-        return StatusCode(201, ApiResponse<MeetingDetailsDto>.SuccessResponse(createdMeeting, "تم إنشاء الاجتماع بنجاح."));
+        return StatusCode(201, createdMeeting);
     }
 
     // 4. Update meeting
@@ -64,16 +67,16 @@ public class ProjectMeetingsController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(ApiResponse<object>.FailureResponse("بيانات غير صالحة", "خطأ في التحقق"));
+            return BadRequest(ModelState);
         }
 
         var success = await _meetingService.UpdateMeetingAsync(id, dto);
         if (!success)
         {
-            return NotFound(ApiResponse<object>.FailureResponse("الاجتماع أو المشروع المرتبط غير موجود", "خطأ"));
+            return NotFound();
         }
 
-        return Ok(ApiResponse<object>.SuccessResponse(null!, "تم تحديث بيانات الاجتماع بنجاح."));
+        return NoContent();
     }
 
     // 5. Delete meeting
@@ -83,9 +86,51 @@ public class ProjectMeetingsController : ControllerBase
         var success = await _meetingService.DeleteMeetingAsync(id);
         if (!success)
         {
-            return NotFound(ApiResponse<object>.FailureResponse("الاجتماع غير موجود", "خطأ 404"));
+            return NotFound();
         }
 
-        return Ok(ApiResponse<object>.SuccessResponse(null!, "تم حذف الاجتماع بنجاح."));
+        return NoContent();
+    }
+
+    // 6. Upload files for meetings
+    [HttpPost("upload")]
+    public async Task<IActionResult> UploadFiles(List<IFormFile> files)
+    {
+        if (files == null || files.Count == 0)
+        {
+            return BadRequest("No files uploaded.");
+        }
+
+        var uploadedFilesList = new List<object>();
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        foreach (var file in files)
+        {
+            if (file.Length > 0)
+            {
+                var originalName = file.FileName;
+                var uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(originalName);
+                var filePath = Path.Combine(uploadsFolder, uniqueName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                uploadedFilesList.Add(new
+                {
+                    originalName = originalName,
+                    uniqueName = uniqueName,
+                    filePath = $"/uploads/{uniqueName}"
+                });
+            }
+        }
+
+        return Ok(uploadedFilesList);
     }
 }
