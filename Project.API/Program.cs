@@ -31,6 +31,13 @@ builder.Services.AddEndpointsApiExplorer();
 // Swagger مع إعدادات حماية JWT Token
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "ProSync-Project API",
+        Version = "v1",
+        Description = "Backend API for ProSync-Project Management System"
+    });
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
