@@ -153,22 +153,31 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 // تفعيل سياسة الـ CORS التي تم تكوينها سابقاً
 app.UseCors("AngularAppPolicy");
 
-// تهيئة وتحديث قاعدة البيانات تلقائياً وتطبيق الهجرات (Migrations) عند تشغيل التطبيق
+// تهيئة وتحديث قاعدة البيانات تلقائياً وتطبيق الهجرات (Migrations) عند تشغيل التطبيق بأمان
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        dbContext.Database.Migrate();
+        Log.Information("تم تحديث وتطبيق هجرات قاعدة البيانات بنجاح.");
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "حدث خطأ أثناء تطبيق الهجرات لقاعدة البيانات عند بدء التشغيل.");
+    }
 }
 
 app.UseStaticFiles();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// تفعيل Swagger في بيئة التطوير والإنتاج (prosync-swagger.runasp.net)
+app.UseSwagger();
+app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 
